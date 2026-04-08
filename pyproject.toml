@@ -1,0 +1,27 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "ry-py"
+requires-python = ">=3.8"
+description = "Repeat yourself - transform Python code using regex rules"
+readme = "README.md"
+license = { text = "MIT" }
+keywords = ["async", "sync", "code-generation", "python", "transformation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Rust",
+    "Topic :: Software Development :: Code Generators",
+]
+dynamic = ["version"]
+
+[tool.maturin]
+bindings = "bin"
