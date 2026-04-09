@@ -1,7 +1,6 @@
 use crate::apply_rules;
 use crate::config::{Config, TargetVariant};
 use crate::diagnostics::Diagnostic;
-use crate::generation::Generation;
 use std::fs;
 
 pub fn process_all_file_targets(
@@ -39,9 +38,6 @@ pub fn process_all_file_targets(
                 } else {
                     fs::write(output, transformed)
                         .map_err(|e| format!("Error writing output file '{}': {}", output, e))?;
-
-                    let generation = Generation::file(input, output);
-                    println!("{}", generation);
 
                     fixed_diagnostics.push(diagnostic);
                 }
