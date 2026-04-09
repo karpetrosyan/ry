@@ -19,8 +19,8 @@ struct Cli {
     #[arg(long, help = "Apply fixes instead of just checking")]
     fix: bool,
 
-    #[arg(default_value = ".", help = "Path to search for Python files")]
-    path: String,
+    #[arg(default_value = ".", help = "Paths to search for Python files")]
+    paths: Vec<String>,
 }
 
 fn grab_effective_paths(input_path: &Path) -> Result<Vec<PathBuf>, String> {
@@ -63,15 +63,18 @@ fn main() {
         }
     };
 
-    let input_path = Path::new(&cli.path);
+    let mut paths_to_process = Vec::new();
 
-    let paths_to_process = match grab_effective_paths(input_path) {
-        Ok(paths) => paths,
-        Err(e) => {
-            eprintln!("Error: {}", e);
-            std::process::exit(1);
+    for path in &cli.paths {
+        let input_path = Path::new(path);
+        match grab_effective_paths(input_path) {
+            Ok(mut paths) => paths_to_process.append(&mut paths),
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
         }
-    };
+    }
 
     let mut diagnostics = Vec::new();
     let mut fixed_diagnostics = Vec::new();
