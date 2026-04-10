@@ -29,7 +29,7 @@ pub fn apply_rules(source: &str, rules: &[Rule]) -> String {
                 } else {
                     eprintln!(
                         "Warning: Invalid regex pattern in rule '{}': {}",
-                        rule.id, rule.match_pattern
+                        rule.id.as_deref().unwrap_or("<unnamed>"), rule.match_pattern
                     );
                 }
             }
