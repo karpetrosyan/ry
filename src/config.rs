@@ -34,7 +34,8 @@ pub struct Package {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Rule {
-    pub id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
     pub kind: RuleKind,
     #[serde(rename = "match")]
     pub match_pattern: String,
@@ -88,10 +89,9 @@ impl Config {
 
     pub fn get_effective_rules_from_defaults(&self) -> Vec<Rule> {
         let mut rules = Vec::new();
-        let mut seen_ids = HashMap::new();
 
         for package_ref in &self.defaults.include {
-            self.add_package_rules(&mut rules, &mut seen_ids, package_ref);
+            self.add_package_rules(&mut rules, package_ref);
         }
 
         rules
@@ -99,23 +99,19 @@ impl Config {
 
     pub fn get_effective_rules(&self, target: &Target) -> Vec<Rule> {
         let mut rules = Vec::new();
-        let mut seen_ids = HashMap::new();
 
         if target.inherit_defaults {
             for package_ref in &self.defaults.include {
-                self.add_package_rules(&mut rules, &mut seen_ids, package_ref);
+                self.add_package_rules(&mut rules, package_ref);
             }
         }
 
         for package_ref in &target.include {
-            self.add_package_rules(&mut rules, &mut seen_ids, package_ref);
+            self.add_package_rules(&mut rules, package_ref);
         }
 
         for rule in &target.rules {
-            if !seen_ids.contains_key(&rule.id) {
-                seen_ids.insert(rule.id.clone(), rules.len());
-                rules.push(rule.clone());
-            }
+            rules.push(rule.clone());
         }
 
         rules
@@ -124,15 +120,14 @@ impl Config {
     fn add_package_rules(
         &self,
         rules: &mut Vec<Rule>,
-        seen_ids: &mut HashMap<String, usize>,
         package_ref: &PackageRef,
     ) {
         let package = crate::packages::get_package(&package_ref.package, &self.packages);
 
         if let Some(pkg) = package {
             for rule in &pkg.rules {
-                if !package_ref.exclude.contains(&rule.id) && !seen_ids.contains_key(&rule.id) {
-                    seen_ids.insert(rule.id.clone(), rules.len());
+                let should_exclude = rule.id.as_ref().map_or(false, |id| package_ref.exclude.contains(id));
+                if !should_exclude {
                     rules.push(rule.clone());
                 }
             }
