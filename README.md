@@ -10,6 +10,12 @@ Ry transforms the Python code using regex rules. Originally built to simplify ma
 
 Comes with a package system where you can define reusable sets of rules. Have a built-in `std` package with all standard rules (like `async def` to `def`, etc), and you can create your own packages for your specific transformations.
 
+## Installation
+
+```bash
+pip install ry-cli
+```
+
 ## Inline Transformations
 
 Ry can transform not only whole files, but also specific lines or blocks of code based on inline comments.
