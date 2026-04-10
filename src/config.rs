@@ -117,16 +117,15 @@ impl Config {
         rules
     }
 
-    fn add_package_rules(
-        &self,
-        rules: &mut Vec<Rule>,
-        package_ref: &PackageRef,
-    ) {
+    fn add_package_rules(&self, rules: &mut Vec<Rule>, package_ref: &PackageRef) {
         let package = crate::packages::get_package(&package_ref.package, &self.packages);
 
         if let Some(pkg) = package {
             for rule in &pkg.rules {
-                let should_exclude = rule.id.as_ref().map_or(false, |id| package_ref.exclude.contains(id));
+                let should_exclude = rule
+                    .id
+                    .as_ref()
+                    .map_or(false, |id| package_ref.exclude.contains(id));
                 if !should_exclude {
                     rules.push(rule.clone());
                 }
