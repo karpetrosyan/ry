@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/karpetrosyan/ry/compare/v0.2.0...v0.3.0) (2026-04-10)
+
+
+### Features
+
+* make rule's id optional ([7c2d7a5](https://github.com/karpetrosyan/ry/commit/7c2d7a54cae7dbf810383127c0262e08bc648b0f))
+
 ## [0.2.0](https://github.com/karpetrosyan/ry/compare/v0.1.0...v0.2.0) (2026-04-09)
 
 
