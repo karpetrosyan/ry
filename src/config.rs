@@ -36,6 +36,7 @@ pub struct Package {
 pub struct Rule {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
+    #[serde(default)]
     pub kind: RuleKind,
     #[serde(rename = "match")]
     pub match_pattern: String,
@@ -46,6 +47,12 @@ pub struct Rule {
 #[serde(rename_all = "lowercase")]
 pub enum RuleKind {
     Regex,
+}
+
+impl Default for RuleKind {
+    fn default() -> Self {
+        RuleKind::Regex
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
