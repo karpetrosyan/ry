@@ -27,6 +27,7 @@ pub enum DiagnosticKind {
         generate_end_byte: usize,
         generated_end_byte: Option<usize>,
         transformed_code: String,
+        actual_code: String,
         indentation: usize,
         source_line: usize,
     },

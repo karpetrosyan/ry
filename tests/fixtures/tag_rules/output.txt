@@ -1,0 +1,2 @@
+input.py:1:0: error: Generate marker @mytag must be followed by a generated node
+Processed 1 file(s) with 1 error(s) and 0 warning(s)

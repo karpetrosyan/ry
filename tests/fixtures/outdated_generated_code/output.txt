@@ -1,0 +1,8 @@
+input.py:1:0: error: Generated code @sync is out of sync with generate marker
+diff for input.py:1:
+-async def fetch_data():  # unasync: generated @sync
+-    result = await get_data()
++def fetch_data():  # unasync: generated @sync
++    result = get_data()
+     return result
+Processed 1 file(s) with 1 error(s) and 0 warning(s)

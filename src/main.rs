@@ -1,7 +1,7 @@
 use clap::Parser;
 use glob::glob;
 use ry::config::Config;
-use ry::diagnostics::{Diagnostic, Severity};
+use ry::diagnostics::{Diagnostic, DiagnosticKind, Severity};
 use ry::inline::process_file_inline;
 use ry::module::process_all_file_targets;
 use std::path::{Path, PathBuf};
@@ -105,13 +105,40 @@ fn main() {
     diagnostics.extend(files_diagnostics);
     fixed_diagnostics.extend(files_fixed);
 
-    print_summary(&paths_to_process, &diagnostics, &fixed_diagnostics);
+    print_summary(&paths_to_process, &diagnostics, &fixed_diagnostics, cli.verbose);
+
+    if diagnostics
+        .iter()
+        .any(|d| matches!(d.severity, Severity::Error))
+    {
+        std::process::exit(1)
+    }
+}
+
+fn print_diff(actual: &str, expected: &str) {
+    use similar::{ChangeTag, TextDiff};
+    use std::io::IsTerminal;
+    let colors = std::io::stderr().is_terminal();
+    let diff = TextDiff::from_lines(actual, expected);
+    for change in diff.iter_all_changes() {
+        let (sign, color, reset) = match change.tag() {
+            ChangeTag::Delete => ("-", "\x1b[31m", "\x1b[0m"),
+            ChangeTag::Insert => ("+", "\x1b[32m", "\x1b[0m"),
+            ChangeTag::Equal => (" ", "", ""),
+        };
+        if colors {
+            eprint!("{}{}{}{}", color, sign, change, reset);
+        } else {
+            eprint!("{}{}", sign, change);
+        }
+    }
 }
 
 fn print_summary(
     paths_to_process: &[PathBuf],
     diagnostics: &[Diagnostic],
     fixed_diagnostics: &[Diagnostic],
+    verbose: bool,
 ) {
     let error_count = diagnostics
         .iter()
@@ -122,6 +149,15 @@ fn print_summary(
         .filter(|d| matches!(d.severity, Severity::Warning))
         .count();
     let fixed_count = fixed_diagnostics.len();
+
+    if verbose {
+        for diagnostic in diagnostics {
+            if let DiagnosticKind::OutDatedGeneratedCode { actual_code, transformed_code, .. } = &diagnostic.kind {
+                eprintln!("diff for {}:{}:", diagnostic.location.file, diagnostic.location.line);
+                print_diff(actual_code, transformed_code);
+            }
+        }
+    }
 
     if fixed_count > 0 {
         println!(

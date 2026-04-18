@@ -297,6 +297,7 @@ fn validate_generate_node(
                         generate_end_byte,
                         generated_end_byte: Some(next.end_byte()),
                         transformed_code: transformed,
+                        actual_code: next_text.to_string(),
                         indentation,
                         source_line: start_line + 1,
                     },

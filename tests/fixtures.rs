@@ -3,6 +3,7 @@ use ry::config::Config;
 use ry::inline::process_file_inline;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 use tempfile::TempDir;
 
 fn get_fixture_dirs() -> Vec<PathBuf> {
@@ -74,6 +75,42 @@ fn run_fixture_test(fixture_dir: &Path) {
         assert_eq!(
             actual_content, expected_content,
             "Fixture '{}': Output does not match expected",
+            fixture_name
+        );
+    }
+
+    let output_path = fixture_dir.join("output.txt");
+
+    let temp_check = temp_dir.path().join("check_input.py");
+    fs::copy(&input_path, &temp_check).unwrap();
+
+    let bin = env!("CARGO_BIN_EXE_ry");
+    let output = Command::new(bin)
+        .args([
+            "--config",
+            config_path.to_str().unwrap(),
+            "--verbose",
+            temp_check.to_str().unwrap(),
+        ])
+        .output()
+        .expect("failed to run ry binary");
+
+    let temp_str = temp_check.to_str().unwrap();
+    let combined = format!(
+        "{}{}",
+        String::from_utf8_lossy(&output.stderr),
+        String::from_utf8_lossy(&output.stdout),
+    )
+    .replace(temp_str, "input.py");
+
+    if update_fixtures || !output_path.exists() {
+        fs::write(&output_path, &combined).unwrap();
+        println!("Fixture '{}': Generated output.txt", fixture_name);
+    } else {
+        let expected_output = fs::read_to_string(&output_path).unwrap();
+        assert_eq!(
+            combined, expected_output,
+            "Fixture '{}': Output does not match output.txt",
             fixture_name
         );
     }
